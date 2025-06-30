@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
+import { FaFilm, FaMapMarkerAlt, FaTheaterMasks, FaTicketAlt, FaUsers } from 'react-icons/fa';
 
 const AdminDashboard = () => {
   const { user, isAdmin } = useAuth();
@@ -22,11 +23,11 @@ const AdminDashboard = () => {
     const fetchStats = async () => {
       try {
         const [moviesRes, venuesRes, showsRes, bookingsRes, usersRes] = await Promise.all([
-          axios.get('http://localhost:5000/api/movies'),
-          axios.get('http://localhost:5000/api/venues'),
-          axios.get('http://localhost:5000/api/shows'),
-          axios.get('http://localhost:5000/api/admin/bookings'),
-          axios.get('http://localhost:5000/api/admin/users')
+          axios.get(`${import.meta.env.VITE_API_URL}/api/movies`),
+          axios.get(`${import.meta.env.VITE_API_URL}/api/venues`),
+          axios.get(`${import.meta.env.VITE_API_URL}/api/shows`),
+          axios.get(`${import.meta.env.VITE_API_URL}/api/admin/bookings`),
+          axios.get(`${import.meta.env.VITE_API_URL}/api/admin/users`)
         ]);
 
         setStats({
@@ -56,16 +57,16 @@ const AdminDashboard = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="text-xl">Loading...</div>
+      <div className="max-w-7xl mx-auto px-4 py-8 flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#F84464] border-t-transparent"></div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+        <h1 className="text-2xl font-bold text-[#1E1E1E]">Admin Dashboard</h1>
         <div className="text-sm text-gray-600">
           Welcome back, {user?.name}
         </div>
@@ -73,94 +74,78 @@ const AdminDashboard = () => {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <div className="flex items-center">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <div className="text-2xl">🎬</div>
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Movies</p>
-              <p className="text-2xl font-semibold text-gray-900">{stats.movies}</p>
-            </div>
+        <div className="bg-white p-6 rounded-xl shadow-sm flex items-center">
+          <div className="p-3 bg-blue-100 rounded-lg">
+            <FaFilm className="text-2xl text-blue-600" />
+          </div>
+          <div className="ml-4">
+            <p className="text-sm font-medium text-gray-600">Movies</p>
+            <p className="text-2xl font-semibold text-gray-900">{stats.movies}</p>
           </div>
         </div>
-
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <div className="flex items-center">
-            <div className="p-2 bg-green-100 rounded-lg">
-              <div className="text-2xl">🏢</div>
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Venues</p>
-              <p className="text-2xl font-semibold text-gray-900">{stats.venues}</p>
-            </div>
+        <div className="bg-white p-6 rounded-xl shadow-sm flex items-center">
+          <div className="p-3 bg-green-100 rounded-lg">
+            <FaMapMarkerAlt className="text-2xl text-green-600" />
+          </div>
+          <div className="ml-4">
+            <p className="text-sm font-medium text-gray-600">Venues</p>
+            <p className="text-2xl font-semibold text-gray-900">{stats.venues}</p>
           </div>
         </div>
-
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <div className="flex items-center">
-            <div className="p-2 bg-purple-100 rounded-lg">
-              <div className="text-2xl">🎭</div>
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Shows</p>
-              <p className="text-2xl font-semibold text-gray-900">{stats.shows}</p>
-            </div>
+        <div className="bg-white p-6 rounded-xl shadow-sm flex items-center">
+          <div className="p-3 bg-purple-100 rounded-lg">
+            <FaTheaterMasks className="text-2xl text-purple-600" />
+          </div>
+          <div className="ml-4">
+            <p className="text-sm font-medium text-gray-600">Shows</p>
+            <p className="text-2xl font-semibold text-gray-900">{stats.shows}</p>
           </div>
         </div>
-
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <div className="flex items-center">
-            <div className="p-2 bg-yellow-100 rounded-lg">
-              <div className="text-2xl">🎫</div>
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Bookings</p>
-              <p className="text-2xl font-semibold text-gray-900">{stats.bookings}</p>
-            </div>
+        <div className="bg-white p-6 rounded-xl shadow-sm flex items-center">
+          <div className="p-3 bg-yellow-100 rounded-lg">
+            <FaTicketAlt className="text-2xl text-yellow-500" />
+          </div>
+          <div className="ml-4">
+            <p className="text-sm font-medium text-gray-600">Bookings</p>
+            <p className="text-2xl font-semibold text-gray-900">{stats.bookings}</p>
           </div>
         </div>
-
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <div className="flex items-center">
-            <div className="p-2 bg-red-100 rounded-lg">
-              <div className="text-2xl">👥</div>
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Users</p>
-              <p className="text-2xl font-semibold text-gray-900">{stats.users}</p>
-            </div>
+        <div className="bg-white p-6 rounded-xl shadow-sm flex items-center">
+          <div className="p-3 bg-red-100 rounded-lg">
+            <FaUsers className="text-2xl text-red-500" />
+          </div>
+          <div className="ml-4">
+            <p className="text-sm font-medium text-gray-600">Users</p>
+            <p className="text-2xl font-semibold text-gray-900">{stats.users}</p>
           </div>
         </div>
       </div>
 
       {/* Quick Actions */}
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
+      <div className="bg-[#F5F5F5] rounded-xl shadow-sm p-6">
+        <h2 className="text-lg font-semibold mb-4 text-[#1E1E1E]">Quick Actions</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Link
             to="/admin/movies"
-            className="bg-blue-600 text-white p-4 rounded-lg hover:bg-blue-700 transition-colors text-center"
+            className="bg-blue-600 text-white p-4 rounded-lg hover:bg-blue-700 transition-colors text-center flex flex-col items-center"
           >
-            <div className="text-2xl mb-2">🎬</div>
+            <FaFilm className="text-2xl mb-2" />
             <div className="font-semibold">Manage Movies</div>
             <div className="text-sm opacity-90">Add, edit, or remove movies</div>
           </Link>
-
           <Link
             to="/admin/venues"
-            className="bg-green-600 text-white p-4 rounded-lg hover:bg-green-700 transition-colors text-center"
+            className="bg-green-600 text-white p-4 rounded-lg hover:bg-green-700 transition-colors text-center flex flex-col items-center"
           >
-            <div className="text-2xl mb-2">🏢</div>
+            <FaMapMarkerAlt className="text-2xl mb-2" />
             <div className="font-semibold">Manage Venues</div>
             <div className="text-sm opacity-90">Add, edit, or remove venues</div>
           </Link>
-
           <Link
             to="/admin/shows"
-            className="bg-purple-600 text-white p-4 rounded-lg hover:bg-purple-700 transition-colors text-center"
+            className="bg-purple-600 text-white p-4 rounded-lg hover:bg-purple-700 transition-colors text-center flex flex-col items-center"
           >
-            <div className="text-2xl mb-2">🎭</div>
+            <FaTheaterMasks className="text-2xl mb-2" />
             <div className="font-semibold">Manage Shows</div>
             <div className="text-sm opacity-90">Schedule and manage shows</div>
           </Link>
@@ -168,10 +153,10 @@ const AdminDashboard = () => {
       </div>
 
       {/* Recent Activity */}
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-xl font-semibold mb-4">Recent Activity</h2>
+      <div className="bg-[#F5F5F5] rounded-xl shadow-sm p-6">
+        <h2 className="text-lg font-semibold mb-4 text-[#1E1E1E]">Recent Activity</h2>
         <div className="space-y-3">
-          <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded">
+          <div className="flex items-center space-x-3 p-3 bg-white rounded">
             <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
             <div className="flex-1">
               <p className="text-sm font-medium">System Overview</p>
@@ -181,8 +166,7 @@ const AdminDashboard = () => {
               {new Date().toLocaleTimeString()}
             </div>
           </div>
-          
-          <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded">
+          <div className="flex items-center space-x-3 p-3 bg-white rounded">
             <div className="w-2 h-2 bg-green-500 rounded-full"></div>
             <div className="flex-1">
               <p className="text-sm font-medium">Statistics Updated</p>

@@ -1,6 +1,7 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Navbar';
+import Footer from './components/Footer';
 import Home from './pages/Home';
 import Movies from './pages/Movies';
 import MovieDetail from './pages/MovieDetail';
@@ -14,31 +15,42 @@ import AdminDashboard from './pages/AdminDashboard';
 import AdminMovies from './pages/AdminMovies';
 import AdminShows from './pages/AdminShows';
 import AdminVenues from './pages/AdminVenues';
+import PrivateRoute from './components/PrivateRoute';
+import PublicRoute from './components/PublicRoute';
+
+function Layout({ children }) {
+  const location = useLocation();
+  const hideNavFooter = location.pathname === '/login' || location.pathname === '/register';
+  return (
+    <div className="min-h-screen flex flex-col bg-gray-100">
+      {!hideNavFooter && <Navbar />}
+      <main className="flex-grow">{children}</main>
+      {!hideNavFooter && <Footer />}
+    </div>
+  );
+}
 
 function App() {
   return (
     <AuthProvider>
       <Router>
-        <div className="min-h-screen bg-gray-50">
-          <Navbar />
-          <main className="container mx-auto px-4 py-8">
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/movies" element={<Movies />} />
-              <Route path="/movies/:id" element={<MovieDetail />} />
-              <Route path="/shows" element={<Shows />} />
-              <Route path="/venues" element={<Venues />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/booking/:showId" element={<Booking />} />
-              <Route path="/booking-history" element={<BookingHistory />} />
-              <Route path="/admin" element={<AdminDashboard />} />
-              <Route path="/admin/movies" element={<AdminMovies />} />
-              <Route path="/admin/shows" element={<AdminShows />} />
-              <Route path="/admin/venues" element={<AdminVenues />} />
-            </Routes>
-          </main>
-        </div>
+        <Layout>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/movies" element={<Movies />} />
+            <Route path="/movies/:id" element={<MovieDetail />} />
+            <Route path="/shows" element={<Shows />} />
+            <Route path="/venues" element={<Venues />} />
+            <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+            <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
+            <Route path="/booking/:showId" element={<PrivateRoute><Booking /></PrivateRoute>} />
+            <Route path="/booking-history" element={<PrivateRoute><BookingHistory /></PrivateRoute>} />
+            <Route path="/admin" element={<PrivateRoute><AdminDashboard /></PrivateRoute>} />
+            <Route path="/admin/movies" element={<PrivateRoute><AdminMovies /></PrivateRoute>} />
+            <Route path="/admin/shows" element={<PrivateRoute><AdminShows /></PrivateRoute>} />
+            <Route path="/admin/venues" element={<PrivateRoute><AdminVenues /></PrivateRoute>} />
+          </Routes>
+        </Layout>
       </Router>
     </AuthProvider>
   );

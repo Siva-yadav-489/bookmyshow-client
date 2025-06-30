@@ -32,7 +32,7 @@ export const AuthProvider = ({ children }) => {
     const checkAuth = async () => {
       if (token) {
         try {
-          const response = await axios.get('http://localhost:5000/api/auth/profile');
+          const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/auth/profile`);
           setUser(response.data.userDetails);
         } catch (error) {
           console.error('Auth check failed:', error);
@@ -48,7 +48,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password, role = 'user') => {
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/login', {
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/login`, {
         email,
         password,
         role
@@ -58,7 +58,7 @@ export const AuthProvider = ({ children }) => {
       setToken(newToken);
       
       // Get user profile
-      const profileResponse = await axios.get('http://localhost:5000/api/auth/profile');
+      const profileResponse = await axios.get(`${import.meta.env.VITE_API_URL}/api/auth/profile`);
       setUser(profileResponse.data.userDetails);
       
       return { success: true };
@@ -72,7 +72,7 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (userData) => {
     try {
-      await axios.post('http://localhost:5000/api/auth/register', userData);
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/register`, userData);
       return { success: true };
     } catch (error) {
       return { 
