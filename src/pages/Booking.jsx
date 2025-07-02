@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
@@ -21,6 +21,7 @@ const Booking = () => {
   const [loading, setLoading] = useState(true);
   const [bookingLoading, setBookingLoading] = useState(false);
   const [error, setError] = useState('');
+  const lockIdRef = useRef(null);
 
   useEffect(() => {
     if (!user) {
@@ -48,49 +49,81 @@ const Booking = () => {
     fetchShowAndSeats();
   }, [showId, user, navigate]);
 
-  const handleSeatClick = (seat) => {
-    if (!seat.isAvailable) return;
-
-    setSelectedSeats(prev => {
-      const isSelected = prev.find(s => s.seatId === seat.seatId);
-      if (isSelected) {
-        return prev.filter(s => s.seatId !== seat.seatId);
-      } else {
-        return [...prev, { ...seat, price: show.price }];
-      }
-    });
+  // Helper to lock seats
+  const lockSeats = async (seatsToLock) => {
+    try {
+      const lockResponse = await axios.post(`${import.meta.env.VITE_API_URL}/api/bookings/lock-seats`, {
+        showId,
+        seats: seatsToLock.map(seat => ({ row: seat.row, seatNumber: seat.seatNumber }))
+      });
+      lockIdRef.current = lockResponse.data.data.lockId;
+      return lockResponse.data.data.lockId;
+    } catch (error) {
+      setError(error.response?.data?.error || 'Failed to lock seats');
+      return null;
+    }
   };
+
+  // Helper to unlock seats
+  const unlockSeats = async () => {
+    if (lockIdRef.current) {
+      try {
+        await axios.post(`${import.meta.env.VITE_API_URL}/api/bookings/unlock-seats`, {
+          lockId: lockIdRef.current
+        });
+        lockIdRef.current = null;
+      } catch (error) {
+        // Ignore unlock errors
+      }
+    }
+  };
+
+  // Lock seats on select, unlock on unselect
+  const handleSeatClick = async (seat) => {
+    if (!seat.isAvailable) return;
+    const isSelected = selectedSeats.find(s => s.seatId === seat.seatId);
+    if (isSelected) {
+      // Unselect: unlock seats
+      await unlockSeats();
+      setSelectedSeats(prev => prev.filter(s => s.seatId !== seat.seatId));
+    } else {
+      // Select: lock seats
+      const newSelection = [...selectedSeats, { ...seat, price: show.price }];
+      const lockId = await lockSeats(newSelection);
+      if (lockId) {
+        setSelectedSeats(newSelection);
+      }
+    }
+  };
+
+  // Unlock seats on unmount or navigation
+  useEffect(() => {
+    return () => {
+      unlockSeats();
+    };
+  }, []);
 
   const handleBooking = async () => {
     if (selectedSeats.length === 0) {
       setError('Please select at least one seat');
       return;
     }
-
     setBookingLoading(true);
     setError('');
-
     try {
-      const lockResponse = await axios.post(`${import.meta.env.VITE_API_URL}/api/bookings/lock-seats`, {
-        showId,
-        seats: selectedSeats.map(seat => ({
-          row: seat.row,
-          seatNumber: seat.seatNumber
-        }))
-      });
-
+      // Use the current lockId for booking
       const seatsToBook = selectedSeats.map(seat => ({
         row: seat.row,
         seatNumber: seat.seatNumber,
         price: seat.price || show.price
       }));
-
       const bookingResponse = await axios.post(`${import.meta.env.VITE_API_URL}/api/bookings`, {
         showId,
         seats: seatsToBook,
         paymentMethod: 'card',
-        lockId: lockResponse.data.data.lockId
+        lockId: lockIdRef.current
       });
+      lockIdRef.current = null;
       navigate('/booking-history');
     } catch (error) {
       setError(error.response?.data?.error || 'Booking failed');
