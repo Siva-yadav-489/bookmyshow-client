@@ -58,7 +58,11 @@ export const AuthProvider = ({ children }) => {
       setToken(newToken);
       
       // Get user profile
-      const profileResponse = await axios.get(`${import.meta.env.VITE_API_URL}/api/auth/profile`);
+      const profileResponse = await axios.get(`${import.meta.env.VITE_API_URL}/api/auth/profile`, {
+        headers: {
+          Authorization: newToken
+        }
+      });
       setUser(profileResponse.data.userDetails);
       
       return { success: true };
